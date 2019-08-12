@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Auto.Dijkstra;
 using UnityEngine;
 using Random = UnityEngine.Random;
 // ReSharper disable ParameterHidesMember
@@ -485,15 +484,15 @@ namespace Auto.LM
     
         #endregion
         
-        public void GenerateTerrain(Texture2D heightMap,GameObject plane,GameObject sea,float height = 100,int extraction = 100,int size = 250)
+        public void GenerateTerrain(Texture2D heightMap,GameObject plane,GameObject sea,float height = 100,int size = 250)
         {
             var verts = new List<Vector3>();
             InitializeTerrain(heightMap, plane, height, size, ref verts);
             
             var average = verts.Select(vert => vert.y).Average();
             
-            sea.transform.position = plane.GetComponent<Renderer>().bounds.center;
-            sea.transform.position = new Vector3(sea.transform.position.x, average, sea.transform.position.z);
+            sea.transform.localPosition = plane.GetComponent<Renderer>().bounds.center;
+            sea.transform.localPosition = new Vector3(sea.transform.localPosition.x, average, sea.transform.localPosition.z);
         }
         
         public void GenerateCave(Texture2D heightMap,GameObject plane,float height = 100,int size = 250)
@@ -513,7 +512,7 @@ namespace Auto.LM
             {
                 for(var j = 0; j < size; j++)
                 {
-                    verts.Add(new Vector3(i, heightMap.GetPixel(i,j).grayscale * height, j));
+                    verts.Add(new Vector3(i, heightMap.GetPixel(i,j).grayscale * height / 3, j));
                     if (i == 0 || j == 0) 
                         continue;
                     
@@ -536,6 +535,9 @@ namespace Auto.LM
     
             if (!plane.GetComponent<MeshRenderer>())
                 plane.AddComponent<MeshRenderer>();
+
+            if (!plane.GetComponent<MeshCollider>())
+                plane.AddComponent<MeshCollider>();
     
             var procMesh = new Mesh
             {
@@ -546,6 +548,7 @@ namespace Auto.LM
             
             procMesh.RecalculateNormals();
             plane.GetComponent<MeshFilter>().mesh = procMesh;
+            plane.GetComponent<MeshCollider>().sharedMesh = procMesh;
         }
     
         #endregion
