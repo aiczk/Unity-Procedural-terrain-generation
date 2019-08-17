@@ -434,7 +434,7 @@ namespace Auto.LM
                 for (var y = startY; y < background.height; y++)
                 {
                     var bgColor = background.GetPixel(x, y);
-                    var olColor = overlay.GetPixel(x - startX, y - startY);
+                    var olColor = overlay.GetPixel(x, y);
     
                     var final_color = Color.Lerp(bgColor, olColor, olColor.a / 1.0f);
     
@@ -450,7 +450,7 @@ namespace Auto.LM
         {
             var texture = new Texture2D(textureSize, textureSize, format, false)
             {
-                filterMode = FilterMode.Point,
+                filterMode = FilterMode.Bilinear,
                 name = "ProceduralHeightMap"
             };
     
@@ -507,24 +507,25 @@ namespace Auto.LM
         private void InitializeTerrain(Texture2D heightMap,GameObject plane,float height,int size,ref List<Vector3> verts)
         {
             var tris = new List<int>();
-     
+
+            size /= 2;
+            
             for(var i = 0; i < size; i++)
+            for (var j = 0; j < size; j++)
             {
-                for(var j = 0; j < size; j++)
-                {
-                    verts.Add(new Vector3(i, heightMap.GetPixel(i,j).grayscale * height / 3, j));
-                    if (i == 0 || j == 0) 
-                        continue;
-                    
-                    tris.Add(size * i + j);
-                    tris.Add(size * i + j - 1);
-                    tris.Add(size * (i - 1) + j - 1);
-                    tris.Add(size * (i - 1) + j - 1);
-                    tris.Add(size * (i - 1) + j);
-                    tris.Add(size * i + j);
-                }
+                verts.Add(new Vector3(i, heightMap.GetPixel(i, j).grayscale * height / 3, j));
+
+                if (i == 0 || j == 0)
+                    continue;
+
+                tris.Add(size * i + j);
+                tris.Add(size * i + j - 1);
+                tris.Add(size * (i - 1) + j - 1);
+                tris.Add(size * (i - 1) + j - 1);
+                tris.Add(size * (i - 1) + j);
+                tris.Add(size * i + j);
             }
-     
+
             var uvs = new Vector2[verts.Count];
             
             for (var i = 0; i < uvs.Length; i++)
@@ -538,7 +539,7 @@ namespace Auto.LM
 
             if (!plane.GetComponent<MeshCollider>())
                 plane.AddComponent<MeshCollider>();
-    
+            
             var procMesh = new Mesh
             {
                 vertices = verts.ToArray(),
@@ -552,5 +553,21 @@ namespace Auto.LM
         }
     
         #endregion
+        
+        public Texture2D Resize(Texture2D texture, int width, int height)
+        {
+            var rt = RenderTexture.GetTemporary(width, height);
+            
+            var preRT = RenderTexture.active;
+            RenderTexture.active = rt;
+            Graphics.Blit(texture, rt);
+            var ret = new Texture2D(width, height);
+            ret.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            ret.Apply();
+            RenderTexture.active = preRT;
+
+            RenderTexture.ReleaseTemporary(rt);
+            return ret;
+        }
     }
 }

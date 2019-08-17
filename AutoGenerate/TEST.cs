@@ -16,15 +16,18 @@ public class TEST : MonoBehaviour
     
     private LandMap landMap = new LandMap(500);
     
-    [Button]
+    [Button(ButtonSizes.Gigantic)]
     private void Generate()
     {
-        landMap.Generate("m1",altitude);
+        landMap.Generate("m1", altitude);
         landMap.Smooth(smooth, "m1", "m2");
         
         var tex2d = landMap.Draw();
+        //tex2d = landMap.MergeTexture(tex2d, overlay);
         var sprite = Sprite.Create(tex2d, new Rect(0, 0, 255, 255), Vector2.zero);
-        landMap.GenerateTerrain(tex2d, ground, sea, height, size);
         image.sprite = sprite;
+        
+        tex2d = landMap.Resize(tex2d, size, size);
+        landMap.GenerateTerrain(tex2d, ground, sea, height, size);
     }
 }
