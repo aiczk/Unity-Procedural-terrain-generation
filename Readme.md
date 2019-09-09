@@ -1,4 +1,4 @@
-# Unity Automatic terrain generation
+# Unity Procedural terrain generation
 
 An asset that allows you to easily generate terrain automatically.
 
