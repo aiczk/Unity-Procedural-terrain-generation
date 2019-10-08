@@ -21,27 +21,7 @@ namespace Auto.LM
             max = size - 1;
             this.textureSize = textureSize;
         }
-    
-        private int IndexOfMin(float[] arr)
-        {
-            if (arr.Length == 0)
-                return -1;
-    
-            var min = arr[0];
-            var minIndex = 0;
-    
-            for (var ind = 1; ind < arr.Length; ind++)
-            {
-                if (!(arr[ind] < min))
-                    continue;
-                
-                minIndex = ind;
-                min = arr[ind];
-            }
-    
-            return minIndex;
-        }
-    
+
         private float RandomValue() => Random.Range(0.1f, 1.0f);
         
         private float Get(string which,float x,float y)
@@ -168,178 +148,6 @@ namespace Auto.LM
                 }
             }
         }
-    
-        public void Combine(string one,string two,string three,string result)
-        {
-            if (!map.ContainsKey(result))
-            {
-                var arraySize = size * size;
-                map.Add(result,new float[(int)arraySize]);
-            }
-    
-            var max = float.MaxValue;
-            var min = float.MinValue;
-    
-            for (var y= 0; y < size; y++)
-            {
-                for (var x = 0; x < size; x++)
-                {
-                    var val = Get(two, x, y);
-    
-                    max = Mathf.Max(max, val);
-                    min = Mathf.Min(min, val);
-                }
-            }
-            
-            for (var y= 0; y < size; y++)
-            {
-                for (var x = 0; x < size; x++)
-                {
-                    var featureOne = Get(one, x, y);
-                    var featureTwo = Get(two, x, y);
-                    var featureThree = Get(three, x, y);
-    
-                    var percent = Percent(featureThree, min, max);
-                    var val = (1 - percent) * featureOne + percent * featureTwo;
-                    Set(result, x, y, val);
-                }
-            }
-        }
-    
-        #region Combine
-    
-        private float Percent(float value,float min,float max)
-        {
-            return value / Mathf.Abs((max - min));
-        }
-        
-        #endregion
-    
-        public void ComplexErosion(float carryingCapacity,float depositionSpeed,int iterations,int drops,string from,string to)
-        {
-            var heightMap = new float[(int) (size * size)];
-            
-            for (var y= 0; y < size; y++)
-            {
-                for (var x = 0; x < size; x++)
-                {
-                    var index = (x + size * y);
-                    heightMap[(int) index] = Get(from, x, y);
-                }
-            }
-    
-            for (var drop = 0; drop < drops; drop++)
-            {
-                heightMap = Deposit_At((int) Mathf.Floor(RandomValue() * size), (int) Mathf.Floor(RandomValue() * size),
-                                       iterations, heightMap, depositionSpeed, carryingCapacity);
-                map[to] = heightMap;
-            }
-        }
-    
-        #region complexErosion
-    
-        private int HMapIndex(int x, int y)
-        {
-            var index = (x + size * y);
-            return (int) index;
-        }
-    
-        private float HMapValue(float[] HMap,int x,int y)
-        {
-            var index = (x + size * y);
-            return HMap[(int) index];
-        }
-    
-        private float[] Deposit_At(int x, int y,int iterations,float[] HMap,float kd,float kq)
-        {
-            var c = 0.0f;
-            var v = 1.05f;
-            var minSlope = 1.15f;
-            var maxVelocity = 10.0f;
-    
-            for (var iter = 0; iter < iterations; iter++)
-            {
-                v = Mathf.Min(v, maxVelocity);
-                var val = HMapValue(HMap, x, y);
-    
-                float[] nv = 
-                {
-                    HMapValue(HMap, x, y - 1),
-                    HMapValue(HMap, x, y + 1),
-                    HMapValue(HMap, x + 1, y),
-                    HMapValue(HMap, x - 1, y)
-                };
-    
-    //            DEBUG
-    //            float s;
-    //
-    //            s = HMapValue(HMap, x, y - 1);
-    //            s = HMapValue(HMap, x, y + 1);
-    //            s = HMapValue(HMap, x + 1, y);
-    //            s = HMapValue(HMap, x - 1, y);
-                
-    
-                var minInd = IndexOfMin(nv);
-    
-                if (!(nv[minInd] < val)) 
-                    continue;
-    
-                var slope = Mathf.Min(minSlope, val - nv[minInd]);
-                var vtc = kd * v * slope;
-    
-                if (c > kq)
-                {
-                    c -= vtc;
-                    HMap[HMapIndex(x, y)] += vtc;
-                }
-                else
-                {
-                    if (c + vtc > kq)
-                    {
-                        var delta = c + vtc - kq;
-                        c += delta;
-                        HMap[HMapIndex(x, y)] -= delta;
-                    }
-                    else
-                    {
-                        c += vtc;
-                        HMap[HMapIndex(x, y)] -= vtc;
-                    }
-                }
-    
-                switch (minInd)
-                {
-                    case 0:
-                        y -= 1;
-                        break;
-                    case 1:
-                        y += 1;
-                        break;
-                    case 2:
-                        x += 1;
-                        break;
-                    case 3:
-                        x -= 1;
-                        break;
-                }
-    
-                if (x > size - 1) 
-                    x = (int) size;
-                
-                if (y > size - 1) 
-                    y = (int) size;
-    
-                if (x < 0) 
-                    x = 0;
-    
-                if (y < 0) 
-                    y = 0;
-            }
-    
-            return HMap;
-        }
-    
-        #endregion
         
         public Texture2D DrawPerlin(float noiseScale,float rounding = 0.5f,TextureFormat format = TextureFormat.RGBA32)
         {
@@ -371,7 +179,6 @@ namespace Auto.LM
     
             return texture;
         }
-        
         public Texture2D DrawOctavePerlin(float noiseScale,float noise = 0.4f,TextureFormat format = TextureFormat.RGBA32)
         {
             var random = Random.Range(-1000f, 1000f);
@@ -406,7 +213,6 @@ namespace Auto.LM
         {
             var a = noise;
             var f = noise;
-            var max = 0.0f;
             var total = 0.0f;
             var per = 0.5f;
     
@@ -436,9 +242,9 @@ namespace Auto.LM
                     var bgColor = background.GetPixel(x, y);
                     var olColor = overlay.GetPixel(x, y);
     
-                    var final_color = Color.Lerp(bgColor, olColor, olColor.a / 1.0f);
+                    var finalColor = Color.Lerp(bgColor, olColor, olColor.a / 1.0f);
     
-                    background.SetPixel(x, y, final_color);
+                    background.SetPixel(x, y, finalColor);
                 }
             }
     
@@ -490,9 +296,11 @@ namespace Auto.LM
             InitializeTerrain(heightMap, plane, height, size, ref verts);
             
             var average = verts.Select(vert => vert.y).Average();
-            
-            sea.transform.localPosition = plane.GetComponent<Renderer>().bounds.center;
-            sea.transform.localPosition = new Vector3(sea.transform.localPosition.x, average, sea.transform.localPosition.z);
+
+            var localPosition = sea.transform.localPosition;
+            localPosition = plane.GetComponent<Renderer>().bounds.center;
+            localPosition = new Vector3(localPosition.x, average, localPosition.z);
+            sea.transform.localPosition = localPosition;
         }
         
         public void GenerateCave(Texture2D heightMap,GameObject plane,float height = 100,int size = 250)
