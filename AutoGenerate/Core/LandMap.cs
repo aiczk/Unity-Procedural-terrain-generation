@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using UnityEngine;
 using Random = UnityEngine.Random;
 // ReSharper disable ParameterHidesMember
@@ -9,39 +10,38 @@ namespace Procedural
     public class LandMap
     {
         private const int TextureSize = 500;
-        
+
         private float[] map;
-        private float size, max;
+        private int size = 257;
+        private int max = 256;
         
         public LandMap()
         {
-            size = 257;
-            max = size - 1;
         }
 
         private static float RandomValue() => Random.Range(0.1f, 1.0f);
-        
-        private float Get(float x,float y)
-        {        
+
+        private float Get(int x, int y)
+        {
             if (x < 0 || x > max || y < 0 || y > max)
                 return -1;
 
             var index = x + size * y;
             return map[(int) index];
         }
-        
-        private void Set(float x, float y, float value)
+
+        private void Set(int x, int y, float value)
         {
             var index = x + size * y;
             map[(int) index] = value;
         }
-    
+
         public void SetUp(float deviation)
         {
             if (map == null)
             {
                 var arraySize = size * size;
-                map = new float[(int)arraySize];
+                map = new float[arraySize];
             }
 
             var randomValue = RandomValue() + max;
@@ -54,13 +54,13 @@ namespace Procedural
             Subdivide(max, deviation);        
         }
         
-        #region Initialize
+        #region SetUp
 
-        private void Subdivide(float size, float deviation)
+        private void Subdivide(int size, float deviation)
         {
             while (true)
             {
-                float x, y;
+                int x, y;
                 var half = size / 2;
                 var scale = deviation * size;
 
@@ -79,7 +79,7 @@ namespace Procedural
             }
         }
         
-        private void Square(float x, float y, float size, float offset)
+        private void Square(int x, int y, int size, float offset)
         {
             var addX = x + size;
             var subX = x - size;
@@ -97,7 +97,7 @@ namespace Procedural
             Set(x, y, ave + offset);
         }
 
-        private void Diamond(float x, float y, float size, float offset)
+        private void Diamond(int x, int y, int size, float offset)
         {
             var addX = x + size;
             var subX = x - size;
@@ -139,8 +139,6 @@ namespace Procedural
         {
             if(amount <= 1)
                 return;
-
-            var roundAmount = Mathf.Round(amount);
             
             for (var y = 0; y < size; y++)
             for (var x = 0; x < size; x++)
@@ -148,8 +146,8 @@ namespace Procedural
                 var nextValue = Get(x, y);
                 var nextValueCount = 0;
 
-                for (var xRange = Math.Max(x - roundAmount, 0); xRange < Math.Min(x + roundAmount, size); xRange++)
-                for (var yRange = Math.Max(y - roundAmount, 0); yRange < Math.Min(y + roundAmount, size); yRange++)
+                for (var xRange = Math.Max(x - amount, 0); xRange < Math.Min(x + amount, size); xRange++)
+                for (var yRange = Math.Max(y - amount, 0); yRange < Math.Min(y + amount, size); yRange++)
                 {
                     var subX = x - xRange;
                     var subY = y - yRange;
@@ -166,12 +164,39 @@ namespace Procedural
             }
         }
         
+        public void Combine(LandMap to)
+        {
+            var maxValue = 0f;
+            var minValue = 0f;
+
+            for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+            {
+                var val = to.Get(x, y);
+
+                maxValue = Math.Max(maxValue, val);
+                minValue = Math.Min(minValue, val);
+            }
+            
+            for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+            {
+                var featureOne = Get(x, y);
+                var featureTwo = to.Get(x, y);
+
+                var percent = featureTwo / Math.Abs(maxValue - minValue);
+                var value = (1 - percent) * featureOne + percent * featureTwo;
+                
+                Set(x, y, value);
+            }
+        }
+
         #region Texture
         
         public Texture2D Perlin(float noiseScale,float rounding = 0.5f, TextureFormat format = TextureFormat.RGBA32)
         {
             var random = Random.Range(-1000f, 1000f);
-            var texture = CreateTexture("ProceduralPerlin");
+            var texture = LandMapExtension.CreateTexture(TextureSize, "ProceduralPerlin");
             
             for (var y = 0; y < TextureSize; y++)
             for (var x = 0; x < TextureSize; x++)
@@ -191,10 +216,11 @@ namespace Procedural
     
             return texture;
         }
+        
         public Texture2D OctavePerlin(float noiseScale,float noise = 0.4f,TextureFormat format = TextureFormat.RGBA32)
         {
             var random = Random.Range(-1000f, 1000f);
-            var texture = CreateTexture("ProceduralPerlin");
+            var texture = LandMapExtension.CreateTexture(TextureSize, "ProceduralPerlin");
             
             for (var y = 0; y < TextureSize; y++)
             for (var x = 0; x < TextureSize; x++)
@@ -211,74 +237,31 @@ namespace Procedural
     
             return texture;
         }
-        public Texture2D Resize(Texture2D texture, int size)
-        {
-            var rt = RenderTexture.GetTemporary(size, size);
-            var preRt = RenderTexture.active;
-            
-            RenderTexture.active = rt;
-            
-            Graphics.Blit(texture, rt);
-            var ret = new Texture2D(size, size);
-            ret.ReadPixels(new Rect(0, 0, size, size), 0, 0);
-            ret.Apply();
-            
-            RenderTexture.active = preRt;
-            RenderTexture.ReleaseTemporary(rt);
-            
-            return ret;
-        }
-        public Texture2D MergeTexture(Texture2D background, Texture2D overlay)
-        {
-            const int startX = 0;
-            var startY = background.height - overlay.height;
-    
-            for (var x = startX; x < background.width; x++)
-            for (var y = startY; y < background.height; y++)
-            {
-                var bgColor = background.GetPixel(x, y);
-                var olColor = overlay.GetPixel(x, y);
-
-                var finalColor = Color.Lerp(bgColor, olColor, olColor.a / 1.0f);
-
-                background.SetPixel(x, y, finalColor);
-            }
-
-            background.Apply();
-            return background;
-        }
-        private Texture2D CreateTexture(string name, FilterMode filterMode = FilterMode.Point, TextureFormat format = TextureFormat.RGBA32)
-        {
-            return new Texture2D(TextureSize, TextureSize, format, false)
-            {
-                filterMode = filterMode,
-                name = name
-            };
-        }
         
-        private float OctavePerlinNoise(float x, float y,float noise = 0.4f)
+        private float OctavePerlinNoise(float x, float y, float noise = 0.4f)
         {
             var a = noise;
             var f = noise;
+            var maxValue = 0.0f;
             var total = 0.0f;
             var per = 0.5f;
     
             for (var i = 0; i < 5; ++i)
             {
                 total += a * Mathf.PerlinNoise(x * f, y * f);
-                max += a;
+                maxValue += a;
                 a *= per;
                 f *= 2.0f;
             }
     
-            return total / max;
+            return total / maxValue;
         }
         
         #endregion
     
         public Texture2D HeightMap(TextureFormat format = TextureFormat.RGB24)
         {
-            var texture = CreateTexture("ProceduralHeightMap", FilterMode.Bilinear, format);
+            var texture = LandMapExtension.CreateTexture(TextureSize, "ProceduralHeightMap", FilterMode.Bilinear, format);
     
             for (var y = 0; y < size; y++)
             for (var x = 0; x < size; x++)
@@ -302,31 +285,32 @@ namespace Procedural
         
         #endregion
 
-        public Mesh CreateMesh(Texture2D heightMap, float height = 100, int size = 100)
+        public Mesh CreateMesh(Texture2D heightMap, float height = 100, int landMapSize = 100)
         {
-            if (size != TextureSize) 
-                heightMap = Resize(heightMap, size);
+            if (TextureSize != landMapSize) 
+                heightMap = LandMapExtension.Resize(heightMap, landMapSize);
 
-            var terrainSize = size / 2;
-            var arraySize = terrainSize * terrainSize;
-            var vertices = new Vector3[arraySize];
-            var triangles = new int[arraySize * 6 - (size - 1) * 6];
-            var uv = new Vector2[arraySize];
+            var halfSize = Mathf.CeilToInt((float) landMapSize / 2);
+            var verticesSize = halfSize * halfSize;
+            
+            var triangles = new int[(verticesSize - (landMapSize - 1)) * 6];
+            var vertices = new Vector3[verticesSize];
+            var uv = new Vector2[verticesSize];
             
             var vert = 0;
             var tri = 0;
             
-            for (var i = 0; i < terrainSize; i++)
-            for (var j = 0; j < terrainSize; j++)
+            for (var i = 0; i < halfSize; i++)
+            for (var j = 0; j < halfSize; j++)
             {
                 vertices[vert] = new Vector3(i, heightMap.GetPixel(i, j).grayscale * height / 3, j);
-                vert++;
+                ++vert;
 
                 if (i == 0 || j == 0)
                     continue;
 
-                var addIj = terrainSize * i + j;
-                var subIj = terrainSize * (i - 1) + j;
+                var addIj = halfSize * i + j;
+                var subIj = halfSize * (i - 1) + j;
 
                 Increment(addIj);
                 Increment(addIj - 1);
@@ -336,17 +320,18 @@ namespace Procedural
                 Increment(addIj);
             }
 
-            for (var i = 0; i < arraySize; i++)
+            for (var i = 0; i < verticesSize; i++)
                 uv[i] = new Vector2(vertices[i].x, vertices[i].z);
-
+            
             var procMesh = new Mesh
             {
                 vertices = vertices,
-                uv = uv,
-                triangles = triangles
+                triangles = triangles,
+                uv = uv
             };
             
             procMesh.RecalculateNormals();
+            
             return procMesh;
             
             void Increment(int value)
