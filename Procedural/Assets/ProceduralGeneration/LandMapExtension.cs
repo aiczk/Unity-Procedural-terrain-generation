@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Procedural
+namespace ProceduralGeneration
 {
     public static class LandMapExtension
     {
