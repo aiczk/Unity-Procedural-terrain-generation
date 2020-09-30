@@ -11,7 +11,7 @@ Basic Generation
 ```cs
 LandMap landMap = new LandMap();
 
-landMap.SetUp(altitude);
+landMap.Initialize(altitude);
 landMap.Smoothness(smooth);
 
 var tex2d = landMap.HeightMap();
@@ -25,7 +25,7 @@ Add Perlin
 ```cs
 LandMap landMap = new LandMap();
 
-landMap.SetUp(altitude);
+landMap.Initialize(altitude);
 landMap.Smoothness(smooth);
 
 var tex2d = landMap.HeightMap();
@@ -37,6 +37,14 @@ var mesh = landMap.CreateMesh(tex2d, height, size);
 gameObject.GetComponent<MeshFilter>().mesh = mesh;
 gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
 ```
+
+
+
+## Feature Outlook and Todo
+
+- Ensureing the scalability and maintainability of each interface.
+- Refactoring.
+- Support for DOTS!
 
 License
 ----
