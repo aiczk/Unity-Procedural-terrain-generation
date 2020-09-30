@@ -12,7 +12,7 @@ Basic Generation
 var lmHeightMap = new LMHeightMap();
 
 var mesh = landMap
-						.Initialize(altitude)
+            .Initialize(altitude)
             .AddEffect(new Smoothness(smooth))
             .AddEffect(new PerlinNoise(perlin))
             .AddEffect(new OctavePerlinNoise(octave))
