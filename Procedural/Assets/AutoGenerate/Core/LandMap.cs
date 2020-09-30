@@ -9,52 +9,46 @@ namespace Procedural
 {
     public class LandMap
     {
+        //warn: do not change! 
         private const int TextureSize = 500;
 
         private float[] map;
-        private int size = 257;
-        private int max = 256;
-        
+        private static readonly int Size = 257;
+        private static readonly int Max = 256;
+
         public LandMap()
         {
+            map = new float[Size * Size];
         }
 
-        private static float RandomValue() => Random.Range(0.1f, 1.0f);
+        private static float RandomValue => Random.Range(0.1f, 1.0f);
 
-        private float Get(int x, int y)
+        private float GetHeight(int x, int y)
         {
-            if (x < 0 || x > max || y < 0 || y > max)
+            if (x < 0 || x > Max || y < 0 || y > Max)
                 return -1;
 
-            var index = x + size * y;
-            return map[(int) index];
+            var index = x + Size * y;
+            return map[index];
         }
 
-        private void Set(int x, int y, float value)
+        private void SetHeight(int x, int y, float value)
         {
-            var index = x + size * y;
-            map[(int) index] = value;
+            var index = x + Size * y;
+            map[index] = value;
         }
 
-        public void SetUp(float deviation)
+        public void Initialize(float deviation)
         {
-            if (map == null)
-            {
-                var arraySize = size * size;
-                map = new float[arraySize];
-            }
+            var random = RandomValue + Max;
 
-            var randomValue = RandomValue() + max;
-
-            Set(0, 0, randomValue);
-            Set(max, 0, randomValue);
-            Set(max, max, randomValue);
-            Set(0, max, randomValue);
+            SetHeight(0, 0, random);
+            SetHeight(Max, 0, random);
+            SetHeight(Max, Max, random);
+            SetHeight(0, Max, random);
     
-            Subdivide(max, deviation);        
+            Subdivide(Max, deviation);      
         }
-        
-        #region SetUp
 
         private void Subdivide(int size, float deviation)
         {
@@ -67,18 +61,18 @@ namespace Procedural
                 if (half < 1) 
                     break;
                 
-                for (y = half; y < max; y += size)
-                for (x = half; x < max; x += size)
-                    Square(x, y, half, RandomValue() * scale * 2 - scale);
+                for (y = half; y < Max; y += size)
+                for (x = half; x < Max; x += size)
+                    Square(x, y, half, RandomValue * scale * 2 - scale);
 
-                for (y = 0; y <= max; y += half)
-                for (x = (y + half) % size; x <= max; x += size)
-                    Diamond(x, y, half, RandomValue() * scale * 2 - scale);
+                for (y = 0; y <= Max; y += half)
+                for (x = (y + half) % size; x <= Max; x += size)
+                    Diamond(x, y, half, RandomValue * scale * 2 - scale);
 
                 size /= 2;
             }
         }
-        
+
         private void Square(int x, int y, int size, float offset)
         {
             var addX = x + size;
@@ -88,13 +82,13 @@ namespace Procedural
 
             var ave = Average
             (
-                Get(subX, subY),
-                Get(addX, subY),
-                Get(addX, addY),
-                Get(subX, addY)
+                GetHeight(subX, subY),
+                GetHeight(addX, subY),
+                GetHeight(addX, addY),
+                GetHeight(subX, addY)
             );
     
-            Set(x, y, ave + offset);
+            SetHeight(x, y, ave + offset);
         }
 
         private void Diamond(int x, int y, int size, float offset)
@@ -106,18 +100,17 @@ namespace Procedural
                 
             var ave = Average
             (
-                Get(x, subY),
-                Get(addX, y),
-                Get(x, addY),
-                Get(subX, y)
+                GetHeight(x, subY),
+                GetHeight(addX, y),
+                GetHeight(x, addY),
+                GetHeight(subX, y)
             );
     
-            Set(x, y, ave + offset);
+            SetHeight(x, y, ave + offset);
         }
-        
+
         private float Average(params float[] values)
         {
-            var count = 0;
             var average = 0f;
             for (var i = 0; i < values.Length; i++)
             {
@@ -127,27 +120,26 @@ namespace Procedural
                     continue;
 
                 average += value;
-                count++;
             }
             
-            return average / count;
+            return average / values.Length;
         }
-        
-        #endregion
-        
+
+        //-----
+
         public void Smoothness(int amount)
         {
             if(amount <= 1)
                 return;
             
-            for (var y = 0; y < size; y++)
-            for (var x = 0; x < size; x++)
+            for (var y = 0; y < Size; y++)
+            for (var x = 0; x < Size; x++)
             {
-                var nextValue = Get(x, y);
+                var nextValue = GetHeight(x, y);
                 var nextValueCount = 0;
 
-                for (var xRange = Math.Max(x - amount, 0); xRange < Math.Min(x + amount, size); xRange++)
-                for (var yRange = Math.Max(y - amount, 0); yRange < Math.Min(y + amount, size); yRange++)
+                for (var xRange = Math.Max(x - amount, 0); xRange < Math.Min(x + amount, Size); xRange++)
+                for (var yRange = Math.Max(y - amount, 0); yRange < Math.Min(y + amount, Size); yRange++)
                 {
                     var subX = x - xRange;
                     var subY = y - yRange;
@@ -155,45 +147,43 @@ namespace Procedural
                     if (!(Math.Sqrt(subX * subX + subY * subY) <= amount))
                         continue;
 
-                    nextValue += Get(xRange, yRange);
+                    nextValue += GetHeight(xRange, yRange);
                     nextValueCount++;
                 }
 
                 var finalValue = nextValue / nextValueCount;
-                Set(x, y, finalValue);
+                SetHeight(x, y, finalValue);
             }
         }
-        
-        public void Combine(LandMap to)
+
+        public void Combine(LandMap other)
         {
             var maxValue = 0f;
             var minValue = 0f;
 
-            for (var y = 0; y < size; y++)
-            for (var x = 0; x < size; x++)
+            for (var y = 0; y < Size; y++)
+            for (var x = 0; x < Size; x++)
             {
-                var val = to.Get(x, y);
+                var val = other.GetHeight(x, y);
 
                 maxValue = Math.Max(maxValue, val);
                 minValue = Math.Min(minValue, val);
             }
             
-            for (var y = 0; y < size; y++)
-            for (var x = 0; x < size; x++)
+            for (var y = 0; y < Size; y++)
+            for (var x = 0; x < Size; x++)
             {
-                var featureOne = Get(x, y);
-                var featureTwo = to.Get(x, y);
+                var featureOne = GetHeight(x, y);
+                var featureTwo = other.GetHeight(x, y);
 
                 var percent = featureTwo / Math.Abs(maxValue - minValue);
                 var value = (1 - percent) * featureOne + percent * featureTwo;
                 
-                Set(x, y, value);
+                SetHeight(x, y, value);
             }
         }
 
-        #region Texture
-        
-        public Texture2D Perlin(float noiseScale,float rounding = 0.5f, TextureFormat format = TextureFormat.RGBA32)
+        public Texture2D Perlin(float noiseScale, float rounding = 0.5f, TextureFormat format = TextureFormat.RGBA32)
         {
             var random = Random.Range(-1000f, 1000f);
             var texture = LandMapExtension.CreateTexture(TextureSize, "ProceduralPerlin");
@@ -201,10 +191,10 @@ namespace Procedural
             for (var y = 0; y < TextureSize; y++)
             for (var x = 0; x < TextureSize; x++)
             {
-                var xSamp = random + (float) x / TextureSize * noiseScale;
-                var ySamp = random + (float) y / TextureSize * noiseScale;
+                var xSample = random + (float) x / TextureSize * noiseScale;
+                var ySample = random + (float) y / TextureSize * noiseScale;
 
-                var color = Mathf.PerlinNoise(xSamp, ySamp);
+                var color = Mathf.PerlinNoise(xSample, ySample);
 
                 if (color <= rounding)
                     color = 0;
@@ -216,8 +206,8 @@ namespace Procedural
     
             return texture;
         }
-        
-        public Texture2D OctavePerlin(float noiseScale,float noise = 0.4f,TextureFormat format = TextureFormat.RGBA32)
+
+        public Texture2D OctavePerlin(float noiseScale, float noise = 0.4f, TextureFormat format = TextureFormat.RGBA32)
         {
             var random = Random.Range(-1000f, 1000f);
             var texture = LandMapExtension.CreateTexture(TextureSize, "ProceduralPerlin");
@@ -235,9 +225,8 @@ namespace Procedural
 
             texture.Apply();
     
-            return texture;
-        }
-        
+            return texture;        }
+
         private float OctavePerlinNoise(float x, float y, float noise = 0.4f)
         {
             var a = noise;
@@ -256,24 +245,21 @@ namespace Procedural
     
             return total / maxValue;
         }
-        
-        #endregion
-    
+
+        //-----
+
         public Texture2D HeightMap(TextureFormat format = TextureFormat.RGB24)
         {
             var texture = LandMapExtension.CreateTexture(TextureSize, "ProceduralHeightMap", FilterMode.Bilinear, format);
     
-            for (var y = 0; y < size; y++)
-            for (var x = 0; x < size; x++)
-                texture.SetPixel(x, y, Brightness(TextureSize, Get(x, y)));
+            for (var y = 0; y < Size; y++)
+            for (var x = 0; x < Size; x++)
+                texture.SetPixel(x, y, Brightness(TextureSize, GetHeight(x, y)));
 
             texture.Apply();
 
-            return texture;
-        }
-        
-        #region HeightMap
-        
+            return texture;        }
+
         private Color Brightness(int textureSize, float value)
         {
             var val = Mathf.Floor(value / textureSize);
@@ -282,8 +268,8 @@ namespace Procedural
             
             return new Color(val, val, val, val);
         }
-        
-        #endregion
+
+        //-----
 
         public Mesh CreateMesh(Texture2D heightMap, float height = 100, int landMapSize = 100)
         {
@@ -339,6 +325,25 @@ namespace Procedural
                 triangles[tri] = value;
                 tri++;
             }
+        }
+
+        public ILandMapEffect Add(ILandMapEffect effect)
+        {
+            return effect;
+        }
+    }
+
+    public interface ILandMapEffect
+    {
+        ILandMapEffect Add(ILandMapEffect effect);
+    }
+
+    public class Perlin : ILandMapEffect
+    {
+        ILandMapEffect ILandMapEffect.Add(ILandMapEffect effect)
+        {
+            
+            return effect;
         }
     }
 }

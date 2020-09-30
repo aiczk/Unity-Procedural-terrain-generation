@@ -1,0 +1,7 @@
+*.csproj
+Procedural/.idea
+Procedural/Library
+Procedural/obj
+Procedural/Temp
+*.sln
+Procedural/Logs

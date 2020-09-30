@@ -15,7 +15,13 @@ namespace AutoGenerate
     
         private void Awake()
         {
-            landMap.SetUp(altitude);
+            //landmap
+            //    .Add(smoothness)
+            
+            var nea = new Perlin();
+            landMap.Add(nea).Add(nea);
+            
+            landMap.Initialize(altitude);
             landMap.Smoothness(smooth);
         
             var tex2d = landMap.HeightMap();
