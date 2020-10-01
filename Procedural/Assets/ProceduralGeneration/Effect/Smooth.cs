@@ -2,7 +2,7 @@ using System;
 
 namespace ProceduralGeneration.Effect
 {
-    public class Smooth : ILandMapEffect
+    public class Smooth : ILandMapEffector
     {
         private readonly int amount;
 
@@ -11,7 +11,7 @@ namespace ProceduralGeneration.Effect
             this.amount = amount;
         }
 
-        void ILandMapEffect.Effect(LandMap landMap)
+        void ILandMapEffector.Effect(LandMap landMap)
         {
             if(amount <= 1)
                 return;

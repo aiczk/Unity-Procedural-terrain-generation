@@ -1,6 +1,6 @@
 ﻿namespace ProceduralGeneration.Effect
 {
-    public interface ILandMapEffect
+    public interface ILandMapEffector
     {
         void Effect(LandMap landMap);
     }

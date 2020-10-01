@@ -3,19 +3,19 @@ using UnityEngine;
 
 namespace ProceduralGeneration.Effect
 {
-    public class LMHeightMap : ILandMapEffect
+    public class LmHeightMap : ILandMapEffector
     {
-        public Texture2D HeightMap = null;
+        public Texture2D HeightMap;
         private readonly TextureFormat format;
 
-        public LMHeightMap(TextureFormat format = TextureFormat.RGB24)
+        public LmHeightMap(TextureFormat format = TextureFormat.RGB24)
         {
             this.format = format;
         }
         
-        void ILandMapEffect.Effect(LandMap landMap)
+        void ILandMapEffector.Effect(LandMap landMap)
         {
-            var texture = LandMapExtension.CreateTexture(LandMap.TextureSize, "ProceduralHeightMap", FilterMode.Bilinear, format);
+            var texture = LandMapUtility.CreateTexture(LandMap.TextureSize, "ProceduralHeightMap", FilterMode.Bilinear, format);
     
             for (var y = 0; y < LandMap.Size; y++)
             for (var x = 0; x < LandMap.Size; x++)

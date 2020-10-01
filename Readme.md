@@ -9,15 +9,17 @@ An asset that allows you to easily generate terrain automatically.
 
 Basic Generation
 ```cs
-var lmHeightMap = new LMHeightMap();
+var landMap = new LandMap();
+var lmHeightMap = new LmHeightMap();
 
 var mesh = landMap
             .Initialize(altitude)
-            .AddEffect(new Smoothness(smooth))
+            .AddEffect(new Smooth(smoothLevel))
             .AddEffect(new PerlinNoise(perlin))
             .AddEffect(new OctavePerlinNoise(octave))
+            .AddEffect(new Combine(otherLandMap))
             .AddEffect(lmHeightMap)
-            .CreateMesh(lmHeightMap, height, size);
+            .CreateMesh(new LmMesh(size, height, lmHeightMap));
 
 image.sprite = Sprite.Create(lmHeightMap.HeightMap, new Rect(0, 0, 255, 255), Vector2.zero);
             
@@ -25,12 +27,12 @@ gameObject.GetComponent<MeshFilter>().mesh = mesh;
 gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
 ```
 
-The current version includes the three features listed above, and an easily extendable interface if it is missing.
+The current version includes the four features listed above, and an easily extendable interface if it is missing.
 
 ### Extension
 
 ```c#
-public interface ILandMapEffect
+public interface ILandMapEffector
 {
   void Effect(Landmap landMap);
 }
@@ -45,6 +47,7 @@ For an extended example, see [PerlinNoise.cs](https://github.com/aiczk/Unity-Pro
 ## Feature Outlook and Todo
 
 - Support for DOTS!
+- Improved generation method when not using HeightMap.
 
 
 

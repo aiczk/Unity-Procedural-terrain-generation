@@ -1,4 +1,5 @@
-﻿using ProceduralGeneration;
+﻿using System.Diagnostics;
+using ProceduralGeneration;
 using ProceduralGeneration.Effect;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,16 +18,16 @@ namespace Scene
 
         private void Awake()
         {
-            var lmHeightMap = new LMHeightMap();
-            
+            var lmHeightMap = new LmHeightMap();
+
             var mesh = landMap
                 .Initialize(altitude)
                 .AddEffect(new Smooth(smooth))
                 .AddEffect(new PerlinNoise(perlin))
                 .AddEffect(new OctavePerlinNoise(octave))
                 .AddEffect(lmHeightMap)
-                .CreateMesh(lmHeightMap, height, size);
-
+                .CreateMesh(new LmMesh(size, height, lmHeightMap));
+            
             image.sprite = Sprite.Create(lmHeightMap.HeightMap, new Rect(0, 0, 255, 255), Vector2.zero);
             
             gameObject.GetComponent<MeshFilter>().mesh = mesh;

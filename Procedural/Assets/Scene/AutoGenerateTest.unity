@@ -571,11 +571,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   image: {fileID: 1486125542}
-  altitude: 1.3
-  perlin: 50
-  octave: 50
+  altitude: 1.8
+  perlin: 43.4
+  octave: 36.8
   smooth: 1
-  height: 50
+  height: 101
   size: 100
 --- !u!64 &498657958
 MeshCollider:

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using ProceduralGeneration.Effect;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -117,129 +118,16 @@ namespace ProceduralGeneration
             }
         }
 
-        public LandMap AddEffect(ILandMapEffect lmEffect)
+        public LandMap AddEffect(ILandMapEffector lmEffector)
         {
-            lmEffect.Effect(this);
+            lmEffector.Effect(this);
             return this;
         }
         
-        /*
-        //test
-        public Mesh CreateMesh(float height = 100, int landMapSize = 100)
+        public Mesh CreateMesh(LmMesh lmMesh)
         {
-            var halfSize = Mathf.CeilToInt((float) landMapSize / 2);
-            var verticesSize = halfSize * halfSize;
-            
-            var triangles = new int[(verticesSize - (landMapSize - 1)) * 6];
-            var vertices = new Vector3[verticesSize];
-            var uv = new Vector2[verticesSize];
-            
-            var vert = 0;
-            var tri = 0;
-
-            var min = map.Min();
-            var max = map.Max();
-            
-            for (var i = 0; i < halfSize; i++)
-            for (var j = 0; j < halfSize; j++, ++vert)
-            {
-                vertices[vert] = new Vector3(i, Mathf.InverseLerp(min, max, GetHeight(i, j)) / 3, j);
-
-                if (i == 0 || j == 0)
-                    continue;
-
-                var addIj = halfSize * i + j;
-                var subIj = halfSize * (i - 1) + j;
-
-                Increment(addIj);
-                Increment(addIj - 1);
-                Increment(subIj - 1);
-                Increment(subIj - 1);
-                Increment(subIj);
-                Increment(addIj);
-            }
-
-            for (var i = 0; i < verticesSize; i++)
-                uv[i] = new Vector2(vertices[i].x, vertices[i].z);
-            
-            var procMesh = new Mesh
-            {
-                vertices = vertices,
-                triangles = triangles,
-                uv = uv
-            };
-            
-            procMesh.RecalculateNormals();
-            
-            return procMesh;
-            
-            void Increment(int value)
-            {
-                triangles[tri] = value;
-                tri++;
-            }
-        }
-        */
-
-        
-        public Mesh CreateMesh(LMHeightMap lmHeightMap, float height = 100, int landMapSize = 100)
-        {
-            var heightMap = lmHeightMap.HeightMap;
-            
-            if (TextureSize != landMapSize) 
-                heightMap = LandMapExtension.Resize(heightMap, landMapSize);
-
-            var halfSize = Mathf.CeilToInt((float) landMapSize / 2);
-            var verticesSize = halfSize * halfSize;
-            
-            var triangles = new int[(verticesSize - (landMapSize - 1)) * 6];
-            var vertices = new Vector3[verticesSize];
-            var uv = new Vector2[verticesSize];
-            
-            var vert = 0;
-            var tri = 0;
-            
-            for (var i = 0; i < halfSize; i++)
-            for (var j = 0; j < halfSize; j++, ++vert)
-            {
-                vertices[vert] = new Vector3(i, heightMap.GetPixel(i, j).grayscale * height / 3, j);
-
-                if (i == 0 || j == 0)
-                    continue;
-
-                var addIj = halfSize * i + j;
-                var subIj = halfSize * (i - 1) + j;
-
-                Increment(addIj);
-                Increment(addIj - 1);
-                Increment(subIj - 1);
-                Increment(subIj - 1);
-                Increment(subIj);
-                Increment(addIj);
-            }
-            
-            for (var i = 0; i < verticesSize; i++)
-                uv[i] = new Vector2(vertices[i].x, vertices[i].z);
-            
-            var procMesh = new Mesh
-            {
-                vertices = vertices,
-                triangles = triangles,
-                uv = uv
-            };
-            
-            procMesh.RecalculateBounds();
-            procMesh.RecalculateTangents();
-            procMesh.RecalculateNormals();
-            procMesh.Optimize();
-
-            return procMesh;
-            
-            void Increment(int value)
-            {
-                triangles[tri] = value;
-                tri++;
-            }
+            lmMesh.Effect(this);
+            return lmMesh.LandMapMesh;
         }
     }
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace ProceduralGeneration.Effect
 {
-    public class PerlinNoise : ILandMapEffect
+    public class PerlinNoise : ILandMapEffector
     {
         private readonly float noiseScale, rounding;
 
@@ -12,7 +12,7 @@ namespace ProceduralGeneration.Effect
             this.rounding = rounding;
         }
         
-        void ILandMapEffect.Effect(LandMap landMap)
+        void ILandMapEffector.Effect(LandMap landMap)
         {
             var random = Random.Range(-1000f, 1000f);
             

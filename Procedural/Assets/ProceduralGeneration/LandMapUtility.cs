@@ -2,7 +2,7 @@
 
 namespace ProceduralGeneration
 {
-    public static class LandMapExtension
+    public static class LandMapUtility
     {
         public static Texture2D Resize(Texture2D texture, int size)
         {
