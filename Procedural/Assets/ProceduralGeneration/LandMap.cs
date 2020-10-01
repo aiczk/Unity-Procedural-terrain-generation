@@ -1,4 +1,5 @@
-﻿using ProceduralGeneration.Effect;
+﻿using System.Linq;
+using ProceduralGeneration.Effect;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,11 +14,8 @@ namespace ProceduralGeneration
         private const int Max = 256;
         private float[] map;
 
-        public LandMap()
-        {
-            map = new float[Size * Size];
-        }
-
+        public LandMap() => map = new float[Size * Size];
+        
         private static float RandomValue => Random.Range(0.1f, 1.0f);
 
         internal float GetHeight(int x, int y)
@@ -79,7 +77,7 @@ namespace ProceduralGeneration
             var addY = y + size;
             var subY = y - size;
 
-            var ave = Average
+            var average = Average
             (
                 GetHeight(subX, subY),
                 GetHeight(addX, subY),
@@ -87,44 +85,37 @@ namespace ProceduralGeneration
                 GetHeight(subX, addY)
             );
     
-            SetHeight(x, y, ave + offset);
+            SetHeight(x, y, average + offset);
         }
 
         private void Diamond(int x, int y, int size, float offset)
         {
-            var addX = x + size;
-            var subX = x - size;
-            var addY = y + size;
-            var subY = y - size;
-                
-            var ave = Average
+            var average = Average
             (
-                GetHeight(x, subY),
-                GetHeight(addX, y),
-                GetHeight(x, addY),
-                GetHeight(subX, y)
+                GetHeight(x, y - size),
+                GetHeight(x + size, y),
+                GetHeight(x, y + size),
+                GetHeight(x - size, y)
             );
     
-            SetHeight(x, y, ave + offset);
+            SetHeight(x, y, average + offset);
         }
 
-        private float Average(params float[] values)
+        private float Average(float a, float b, float c, float d)
         {
-            var average = 0f;
-            for (var i = 0; i < values.Length; i++)
-            {
-                ref var value = ref values[i];
-                
-                if(value.Equals(-1f))
-                    continue;
-
-                average += value;
-            }
+            Check(ref a);
+            Check(ref b);
+            Check(ref c);
+            Check(ref d);
             
-            return average / values.Length;
-        }
+            return (a + b + c + d) / 4;
 
-        //-----
+            void Check(ref float value)
+            {
+                if (value.Equals(-1f))
+                    value = 0;
+            }
+        }
 
         public LandMap AddEffect(ILandMapEffect lmEffect)
         {
@@ -132,13 +123,10 @@ namespace ProceduralGeneration
             return this;
         }
         
-        public Mesh CreateMesh(LMHeightMap lmHeightMap, float height = 100, int landMapSize = 100)
+        /*
+        //test
+        public Mesh CreateMesh(float height = 100, int landMapSize = 100)
         {
-            var heightMap = lmHeightMap.HeightMap;
-            
-            if (TextureSize != landMapSize) 
-                heightMap = LandMapExtension.Resize(heightMap, landMapSize);
-
             var halfSize = Mathf.CeilToInt((float) landMapSize / 2);
             var verticesSize = halfSize * halfSize;
             
@@ -148,12 +136,14 @@ namespace ProceduralGeneration
             
             var vert = 0;
             var tri = 0;
+
+            var min = map.Min();
+            var max = map.Max();
             
             for (var i = 0; i < halfSize; i++)
-            for (var j = 0; j < halfSize; j++)
+            for (var j = 0; j < halfSize; j++, ++vert)
             {
-                vertices[vert] = new Vector3(i, heightMap.GetPixel(i, j).grayscale * height / 3, j);
-                ++vert;
+                vertices[vert] = new Vector3(i, Mathf.InverseLerp(min, max, GetHeight(i, j)) / 3, j);
 
                 if (i == 0 || j == 0)
                     continue;
@@ -181,6 +171,68 @@ namespace ProceduralGeneration
             
             procMesh.RecalculateNormals();
             
+            return procMesh;
+            
+            void Increment(int value)
+            {
+                triangles[tri] = value;
+                tri++;
+            }
+        }
+        */
+
+        
+        public Mesh CreateMesh(LMHeightMap lmHeightMap, float height = 100, int landMapSize = 100)
+        {
+            var heightMap = lmHeightMap.HeightMap;
+            
+            if (TextureSize != landMapSize) 
+                heightMap = LandMapExtension.Resize(heightMap, landMapSize);
+
+            var halfSize = Mathf.CeilToInt((float) landMapSize / 2);
+            var verticesSize = halfSize * halfSize;
+            
+            var triangles = new int[(verticesSize - (landMapSize - 1)) * 6];
+            var vertices = new Vector3[verticesSize];
+            var uv = new Vector2[verticesSize];
+            
+            var vert = 0;
+            var tri = 0;
+            
+            for (var i = 0; i < halfSize; i++)
+            for (var j = 0; j < halfSize; j++, ++vert)
+            {
+                vertices[vert] = new Vector3(i, heightMap.GetPixel(i, j).grayscale * height / 3, j);
+
+                if (i == 0 || j == 0)
+                    continue;
+
+                var addIj = halfSize * i + j;
+                var subIj = halfSize * (i - 1) + j;
+
+                Increment(addIj);
+                Increment(addIj - 1);
+                Increment(subIj - 1);
+                Increment(subIj - 1);
+                Increment(subIj);
+                Increment(addIj);
+            }
+            
+            for (var i = 0; i < verticesSize; i++)
+                uv[i] = new Vector2(vertices[i].x, vertices[i].z);
+            
+            var procMesh = new Mesh
+            {
+                vertices = vertices,
+                triangles = triangles,
+                uv = uv
+            };
+            
+            procMesh.RecalculateBounds();
+            procMesh.RecalculateTangents();
+            procMesh.RecalculateNormals();
+            procMesh.Optimize();
+
             return procMesh;
             
             void Increment(int value)

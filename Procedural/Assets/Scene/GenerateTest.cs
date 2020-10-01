@@ -21,7 +21,7 @@ namespace Scene
             
             var mesh = landMap
                 .Initialize(altitude)
-                .AddEffect(new Smoothness(smooth))
+                .AddEffect(new Smooth(smooth))
                 .AddEffect(new PerlinNoise(perlin))
                 .AddEffect(new OctavePerlinNoise(octave))
                 .AddEffect(lmHeightMap)

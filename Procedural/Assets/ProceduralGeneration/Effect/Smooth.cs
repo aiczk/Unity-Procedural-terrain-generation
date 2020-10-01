@@ -2,11 +2,11 @@ using System;
 
 namespace ProceduralGeneration.Effect
 {
-    public class Smoothness : ILandMapEffect
+    public class Smooth : ILandMapEffect
     {
         private readonly int amount;
 
-        public Smoothness(int amount)
+        public Smooth(int amount)
         {
             this.amount = amount;
         }
