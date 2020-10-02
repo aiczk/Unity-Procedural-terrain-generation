@@ -573,10 +573,10 @@ MonoBehaviour:
   image: {fileID: 1486125542}
   altitude: 1.89
   perlin: 43.4
-  octave: 36.8
+  octave: 29.7
   smooth: 1
-  height: 50
-  size: 100
+  height: 88
+  size: 250
 --- !u!64 &498657958
 MeshCollider:
   m_ObjectHideFlags: 0

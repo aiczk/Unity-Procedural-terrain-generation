@@ -3,6 +3,7 @@ using ProceduralGeneration;
 using ProceduralGeneration.Effect;
 using UnityEngine;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 namespace Scene
 {
@@ -12,7 +13,7 @@ namespace Scene
         [SerializeField, Range(0.2f, 2)] private float altitude = default;
         [SerializeField, Range(10, 50)] private float perlin = 10, octave = 10;
         [SerializeField, Range(1, 5)] private int smooth = 1;
-        [SerializeField, Range(50, 250)] private int height = default, size = default;
+        [SerializeField, Range(50, 250)] private int height = 50, size = 50;
     
         private readonly LandMap landMap = new LandMap();
 
@@ -20,15 +21,22 @@ namespace Scene
         {
             var lmHeightMap = new LmHeightMap();
 
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             var mesh = landMap
                 .Initialize(altitude)
-                .AddEffect(new Smooth(smooth))
-                .AddEffect(new PerlinNoise(perlin))
-                .AddEffect(new OctavePerlinNoise(octave))
+                //.AddEffect(new Smooth(smooth))
+                //.AddEffect(new PerlinNoise(perlin))
+                //.AddEffect(new OctavePerlinNoise(octave))
+                .AddEffect(new ComplexErosion(5.5f, 0.3f, 3, 5000000))
                 .AddEffect(lmHeightMap)
                 .CreateMesh(new LmMesh(lmHeightMap, size, height));
             
-            image.sprite = Sprite.Create(lmHeightMap.HeightMap, new Rect(0, 0, 255, 255), Vector2.zero);
+            stopWatch.Stop();
+            Debug.Log($"{stopWatch.ElapsedMilliseconds.ToString()}ms");
+            
+            image.sprite = Sprite.Create(lmHeightMap.HeightMap, new Rect(0, 0, 256, 256), Vector2.zero);
             
             gameObject.GetComponent<MeshFilter>().mesh = mesh;
             gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
