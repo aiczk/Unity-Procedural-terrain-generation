@@ -15,14 +15,14 @@ namespace ProceduralGeneration.Effect
         
         void ILandMapEffector.Effect(LandMap landMap)
         {
-            var texture = LandMapUtility.CreateTexture(LandMap.TextureSize, "ProceduralHeightMap", FilterMode.Bilinear, format);
+            var heightMap = LandMapUtility.CreateTexture(LandMap.TextureSize, "HeightMap", FilterMode.Bilinear, format);
     
             for (var y = 0; y < LandMap.Size; y++)
             for (var x = 0; x < LandMap.Size; x++)
-                texture.SetPixel(x, y, Brightness(LandMap.TextureSize, landMap.GetHeight(x, y)));
+                heightMap.SetPixel(x, y, Brightness(LandMap.TextureSize, landMap.GetHeight(x, y)));
 
-            texture.Apply();
-            HeightMap = texture;
+            heightMap.Apply();
+            HeightMap = heightMap;
         }
         
         private Color Brightness(int textureSize, float value)

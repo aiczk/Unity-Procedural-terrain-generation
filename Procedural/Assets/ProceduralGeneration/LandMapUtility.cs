@@ -6,22 +6,22 @@ namespace ProceduralGeneration
     {
         public static Texture2D Resize(Texture2D texture, int size)
         {
-            var rt = RenderTexture.GetTemporary(size, size);
+            var temp = RenderTexture.GetTemporary(size, size);
             var preRt = RenderTexture.active;
             
-            RenderTexture.active = rt;
+            RenderTexture.active = temp;
             
-            Graphics.Blit(texture, rt);
-            var ret = new Texture2D(size, size);
-            ret.ReadPixels(new Rect(0, 0, size, size), 0, 0);
-            ret.Apply();
+            Graphics.Blit(texture, temp);
+            var tex = new Texture2D(size, size);
+            tex.ReadPixels(new Rect(0, 0, size, size), 0, 0);
+            tex.Apply();
             
             RenderTexture.active = preRt;
-            RenderTexture.ReleaseTemporary(rt);
+            RenderTexture.ReleaseTemporary(temp);
             
-            return ret;
+            return tex;
         }
-        
+
         public static Texture2D MergeTexture(Texture2D background, Texture2D overlay)
         {
             const int startX = 0;

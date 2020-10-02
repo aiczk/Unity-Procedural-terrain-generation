@@ -1,8 +1,6 @@
-﻿using System.Globalization;
-using System.Linq;
+﻿using System;
 using ProceduralGeneration.Effect;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace ProceduralGeneration
 {
@@ -11,17 +9,17 @@ namespace ProceduralGeneration
         //warning: do not change! 
         internal const int TextureSize = 500;
         internal const int Size = 257;
+        private const int MaxSize = 256;
         
-        private const int Max = 256;
-        private float[] map;
+        private readonly float[] map;
 
         public LandMap() => map = new float[Size * Size];
         
-        private static float RandomValue => Random.Range(0.1f, 1.0f);
+        private static float RandomValue => UnityEngine.Random.Range(0.1f, 1.0f);
 
         internal float GetHeight(int x, int y)
         {
-            if (x < 0 || x > Max || y < 0 || y > Max)
+            if (x < 0 || x > MaxSize || y < 0 || y > MaxSize)
                 return -1;
 
             var index = x + Size * y;
@@ -34,16 +32,18 @@ namespace ProceduralGeneration
             map[index] = value;
         }
 
+        internal float Query(Func<float[], float> func) => func(map);
+        
         public LandMap Initialize(float deviation)
         {
-            var random = RandomValue + Max;
+            var random = RandomValue + MaxSize;
 
             SetHeight(0, 0, random);
-            SetHeight(Max, 0, random);
-            SetHeight(Max, Max, random);
-            SetHeight(0, Max, random);
+            SetHeight(MaxSize, 0, random);
+            SetHeight(MaxSize, MaxSize, random);
+            SetHeight(0, MaxSize, random);
     
-            Subdivide(Max, deviation);
+            Subdivide(MaxSize, deviation);
 
             return this;
         }
@@ -59,12 +59,12 @@ namespace ProceduralGeneration
                 if (half < 1) 
                     break;
                 
-                for (y = half; y < Max; y += size)
-                for (x = half; x < Max; x += size)
+                for (y = half; y < MaxSize; y += size)
+                for (x = half; x < MaxSize; x += size)
                     Square(x, y, half, RandomValue * scale * 2 - scale);
 
-                for (y = 0; y <= Max; y += half)
-                for (x = (y + half) % size; x <= Max; x += size)
+                for (y = 0; y <= MaxSize; y += half)
+                for (x = (y + half) % size; x <= MaxSize; x += size)
                     Diamond(x, y, half, RandomValue * scale * 2 - scale);
 
                 size /= 2;
@@ -108,7 +108,7 @@ namespace ProceduralGeneration
             Check(ref b);
             Check(ref c);
             Check(ref d);
-            
+
             return (a + b + c + d) / 4;
 
             void Check(ref float value)

@@ -5,15 +5,15 @@ namespace ProceduralGeneration.Effect
     public class LmMesh : ILandMapEffector
     {
         public Mesh LandMapMesh { get; private set; }
+        private readonly LmHeightMap lmHeightMap;
         private readonly int size;
         private readonly float height;
-        private readonly LmHeightMap lmHeightMap;
 
-        public LmMesh(int size = 100, float height = 100, LmHeightMap lmHeightMap = null)
+        public LmMesh(LmHeightMap lmHeightMap, int size = 100, float height = 100)
         {
+            this.lmHeightMap = lmHeightMap;
             this.size = size;
             this.height = height;
-            this.lmHeightMap = lmHeightMap;
         }
 
         public void Effect(LandMap landMap)
@@ -62,7 +62,8 @@ namespace ProceduralGeneration.Effect
             {
                 vertices = vertices,
                 triangles = triangles,
-                uv = uv
+                uv = uv,
+                name = "LandMap"
             };
             
             mesh.RecalculateBounds();

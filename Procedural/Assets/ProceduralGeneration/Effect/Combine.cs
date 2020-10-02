@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace ProceduralGeneration.Effect
 {
@@ -10,19 +11,9 @@ namespace ProceduralGeneration.Effect
 
         void ILandMapEffector.Effect(LandMap landMap)
         {
-            var maxValue = 0f;
-            var minValue = 0f;
+            var maxValue = landMap.Query(x => x.Max());
+            var minValue = landMap.Query(x => x.Min());
 
-            //todo: use linq min/max
-            for (var y = 0; y < LandMap.Size; y++)
-            for (var x = 0; x < LandMap.Size; x++)
-            {
-                var value = other.GetHeight(x, y);
-
-                maxValue = Math.Max(maxValue, value);
-                minValue = Math.Min(minValue, value);
-            }
-            
             for (var y = 0; y < LandMap.Size; y++)
             for (var x = 0; x < LandMap.Size; x++)
             {

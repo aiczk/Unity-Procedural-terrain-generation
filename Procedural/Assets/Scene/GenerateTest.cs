@@ -26,7 +26,7 @@ namespace Scene
                 .AddEffect(new PerlinNoise(perlin))
                 .AddEffect(new OctavePerlinNoise(octave))
                 .AddEffect(lmHeightMap)
-                .CreateMesh(new LmMesh(size, height, lmHeightMap));
+                .CreateMesh(new LmMesh(lmHeightMap, size, height));
             
             image.sprite = Sprite.Create(lmHeightMap.HeightMap, new Rect(0, 0, 255, 255), Vector2.zero);
             
