@@ -18,6 +18,7 @@ var mesh = landMap
             .AddEffect(new PerlinNoise(perlin))
             .AddEffect(new OctavePerlinNoise(octave))
             .AddEffect(new Combine(otherLandMap))
+            .AddEffect(new ComplexErosion(carryingCapacity, depositionSpeed, iterationCount, drop))
             .AddEffect(lmHeightMap)
             .CreateMesh(new LmMesh(lmHeightMap, size, height));
 
@@ -27,7 +28,7 @@ gameObject.GetComponent<MeshFilter>().mesh = mesh;
 gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
 ```
 
-The current version includes the four features listed above, and an easily extendable interface if it is missing.
+The current version includes the five features listed above, and an easily extendable interface if it is missing.
 
 ### Extension
 

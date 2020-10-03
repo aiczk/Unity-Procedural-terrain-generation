@@ -572,11 +572,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   image: {fileID: 1486125542}
   altitude: 1.89
+  height: 100
+  size: 50
   perlin: 43.4
   octave: 29.7
   smooth: 1
-  height: 88
-  size: 250
+  carryingCapacity: 1.49
+  depositionSpeed: 0.0317
+  iterationCount: 3
+  drop: 8000000
 --- !u!64 &498657958
 MeshCollider:
   m_ObjectHideFlags: 0

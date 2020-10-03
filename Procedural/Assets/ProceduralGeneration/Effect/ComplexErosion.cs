@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace ProceduralGeneration.Effect
@@ -46,12 +47,12 @@ namespace ProceduralGeneration.Effect
                     landMap.GetHeight(x - 1, y)
                 };
 
-                var minInd = IndexOfMinimum(nv);
+                var minIndex = IndexOfMinimum(nv);
 
-                if (!(nv[minInd] < value)) 
+                if (!(nv[minIndex] < value)) 
                     continue;
 
-                var slope = Mathf.Min(minSlope, value - nv[minInd]);
+                var slope = Mathf.Min(minSlope, value - nv[minIndex]);
                 var vtc = depositionSpeed * v * slope;
 
                 if (c > carryingCapacity)
@@ -74,7 +75,7 @@ namespace ProceduralGeneration.Effect
                     }
                 }
 
-                switch (minInd)
+                switch (minIndex)
                 {
                     case 0: y -= 1; break;
                     case 1: y += 1; break;
@@ -87,30 +88,30 @@ namespace ProceduralGeneration.Effect
                 
                 if (x < 0) 
                     x = 0;
-
+                
                 if (y > LandMap.MaxSize) 
                     y = LandMap.Size;
-
+                
                 if (y < 0) 
                     y = 0;
             }
-        }
-
-        private int IndexOfMinimum(float[] nv)
-        {
-            var index = 0;
-            var min = nv[0];
             
-            for (var i = 0; i < 3; i++)
+            int IndexOfMinimum(IReadOnlyList<float> array)
             {
-                if (!(nv[i] < min))
-                    continue;
-                
-                min = nv[i];
-                index = i;
-            }
+                var index = 0;
+                var minValue = array[0];
             
-            return index;
+                for (var i = 0; i < 3; i++)
+                {
+                    if (!(array[i] < minValue))
+                        continue;
+                
+                    minValue = array[i];
+                    index = i;
+                }
+            
+                return index;
+            }
         }
     }
 }

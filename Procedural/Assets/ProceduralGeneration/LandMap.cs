@@ -11,11 +11,11 @@ namespace ProceduralGeneration
         internal const int Size = 257;
         internal const int MaxSize = 256;
         
-        private float[] map;
+        private readonly float[] map;
 
         public LandMap() => map = new float[Size * Size];
         
-        internal static float RandomValue => UnityEngine.Random.Range(0.1f, 1.0f);
+        internal static float RandomValue => UnityEngine.Random.Range(0f, 1.0f);
 
         internal float GetHeight(int x, int y)
         {
@@ -102,16 +102,16 @@ namespace ProceduralGeneration
             SetHeight(x, y, average + offset);
         }
 
-        private float Average(float a, float b, float c, float d)
+        private static float Average(float a, float b, float c, float d)
         {
-            Check(ref a);
-            Check(ref b);
-            Check(ref c);
-            Check(ref d);
+            CheckInvalidValue(ref a);
+            CheckInvalidValue(ref b);
+            CheckInvalidValue(ref c);
+            CheckInvalidValue(ref d);
 
             return (a + b + c + d) / 4;
 
-            void Check(ref float value)
+            void CheckInvalidValue(ref float value)
             {
                 if (value.Equals(-1f))
                     value = 0;
