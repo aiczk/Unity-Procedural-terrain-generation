@@ -29,7 +29,7 @@ namespace Scene
                 //.AddEffect(new Smooth(smooth))
                 //.AddEffect(new PerlinNoise(perlin))
                 //.AddEffect(new OctavePerlinNoise(octave))
-                .AddEffect(new ComplexErosion(5.5f, 0.3f, 3, 5000000))
+                .AddEffect(new ComplexErosion(1.5f, 0.03f, 3, 8000000))
                 .AddEffect(lmHeightMap)
                 .CreateMesh(new LmMesh(lmHeightMap, size, height));
             

@@ -33,7 +33,6 @@ namespace ProceduralGeneration
         }
 
         internal float Query(Func<float[], float> func) => func(map);
-        internal void Replace(ref float[] newMap) => map = newMap;
         
         public LandMap Initialize(float deviation)
         {

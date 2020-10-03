@@ -22,11 +22,11 @@ namespace ProceduralGeneration.Effect
             {
                 var x = Mathf.FloorToInt(LandMap.RandomValue * LandMap.Size);
                 var y = Mathf.FloorToInt(LandMap.RandomValue * LandMap.Size);
-                Deposit(landMap, x, y, depositionSpeed, carryingCapacity);
+                Deposit(landMap, x, y);
             }
         }
         
-        private void Deposit(LandMap landMap, int x, int y, float kd, float kq)
+        private void Deposit(LandMap landMap, int x, int y)
         {
             var c = 0f;
             var v = 1.05f;
@@ -40,10 +40,10 @@ namespace ProceduralGeneration.Effect
 
                 float[] nv = 
                 {
-                    landMap.GetHeight(x, y - 1), //North
-                    landMap.GetHeight(x, y + 1), //South
-                    landMap.GetHeight(x + 1, y), //East
-                    landMap.GetHeight(x - 1, y)  //West
+                    landMap.GetHeight(x, y - 1),
+                    landMap.GetHeight(x, y + 1),
+                    landMap.GetHeight(x + 1, y),
+                    landMap.GetHeight(x - 1, y)
                 };
 
                 var minInd = IndexOfMinimum(nv);
@@ -52,18 +52,18 @@ namespace ProceduralGeneration.Effect
                     continue;
 
                 var slope = Mathf.Min(minSlope, value - nv[minInd]);
-                var vtc = kd * v * slope;
+                var vtc = depositionSpeed * v * slope;
 
-                if (c > kq)
+                if (c > carryingCapacity)
                 {
                     c -= vtc;
                     landMap.SetHeight(x, y, landMap.GetHeight(x, y) + vtc);
                 }
                 else
                 {
-                    if (c + vtc > kq)
+                    if (c + vtc > carryingCapacity)
                     {
-                        var delta = c + vtc - kq;
+                        var delta = c + vtc - carryingCapacity;
                         c += delta;
                         landMap.SetHeight(x, y, landMap.GetHeight(x, y) + delta);
                     }
@@ -84,12 +84,12 @@ namespace ProceduralGeneration.Effect
 
                 if (x > LandMap.MaxSize) 
                     x = LandMap.Size;
+                
+                if (x < 0) 
+                    x = 0;
 
                 if (y > LandMap.MaxSize) 
                     y = LandMap.Size;
-
-                if (x < 0) 
-                    x = 0;
 
                 if (y < 0) 
                     y = 0;
