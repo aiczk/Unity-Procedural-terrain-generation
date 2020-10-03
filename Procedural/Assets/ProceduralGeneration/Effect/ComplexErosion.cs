@@ -5,12 +5,8 @@ namespace ProceduralGeneration.Effect
 {
     public class ComplexErosion : ILandMapEffector
     {
-        private float carryingCapacity;
-        private float depositionSpeed;
-        private int iterations;
-        private int drops;
-        private float[] heightMap;
-        private int size;
+        private readonly float carryingCapacity, depositionSpeed;
+        private readonly int iterations, drops;
 
         public ComplexErosion(float carryingCapacity, float depositionSpeed, int iterations, int drops)
         {
@@ -22,27 +18,15 @@ namespace ProceduralGeneration.Effect
 
         void ILandMapEffector.Effect(LandMap landMap)
         {
-            size = LandMap.MaxSize;
-            heightMap = new float[LandMap.Size * LandMap.Size];
-
-            for (var y = 0; y < LandMap.Size; y++)
-            for (var x = 0; x < LandMap.Size; x++)
-                heightMap[GetIndex(x, y)] = landMap.GetHeight(x, y);
-
             for (var drop = 0; drop < drops; drop++)
             {
                 var x = Mathf.FloorToInt(LandMap.RandomValue * LandMap.Size);
                 var y = Mathf.FloorToInt(LandMap.RandomValue * LandMap.Size);
-                DepositAt(x, y, depositionSpeed, carryingCapacity);
+                Deposit(landMap, x, y, depositionSpeed, carryingCapacity);
             }
-
-            landMap.Replace(ref heightMap);
         }
         
-        private int GetIndex(int x, int y) => x + size * y;
-        private float GetValue(int x, int y) => heightMap[GetIndex(x, y)];
-
-        private void DepositAt(int x, int y, float kd, float kq)
+        private void Deposit(LandMap landMap, int x, int y, float kd, float kq)
         {
             var c = 0f;
             var v = 1.05f;
@@ -52,17 +36,17 @@ namespace ProceduralGeneration.Effect
             for (var iteration = 0; iteration < iterations; iteration++)
             {
                 v = Mathf.Min(v, maxVelocity);
-                var value = GetValue(x, y);
+                var value = landMap.GetHeight(x, y);
 
                 float[] nv = 
                 {
-                    GetValue(x, y - 1), //North
-                    GetValue(x, y + 1), //South
-                    GetValue(x + 1, y), //East
-                    GetValue(x - 1, y)  //West
+                    landMap.GetHeight(x, y - 1), //North
+                    landMap.GetHeight(x, y + 1), //South
+                    landMap.GetHeight(x + 1, y), //East
+                    landMap.GetHeight(x - 1, y)  //West
                 };
 
-                var minInd = IndexOfMin(nv);
+                var minInd = IndexOfMinimum(nv);
 
                 if (!(nv[minInd] < value)) 
                     continue;
@@ -73,7 +57,7 @@ namespace ProceduralGeneration.Effect
                 if (c > kq)
                 {
                     c -= vtc;
-                    heightMap[GetIndex(x, y)] += vtc;
+                    landMap.SetHeight(x, y, landMap.GetHeight(x, y) + vtc);
                 }
                 else
                 {
@@ -81,12 +65,12 @@ namespace ProceduralGeneration.Effect
                     {
                         var delta = c + vtc - kq;
                         c += delta;
-                        heightMap[GetIndex(x, y)] -= delta;
+                        landMap.SetHeight(x, y, landMap.GetHeight(x, y) + delta);
                     }
                     else
                     {
                         c += vtc;
-                        heightMap[GetIndex(x, y)] -= vtc;
+                        landMap.SetHeight(x, y, landMap.GetHeight(x, y) - vtc);
                     }
                 }
 
@@ -98,11 +82,11 @@ namespace ProceduralGeneration.Effect
                     case 3: x -= 1; break;
                 }
 
-                if (x > size - 1) 
-                    x = size;
+                if (x > LandMap.MaxSize) 
+                    x = LandMap.Size;
 
-                if (y > size - 1) 
-                    y = size;
+                if (y > LandMap.MaxSize) 
+                    y = LandMap.Size;
 
                 if (x < 0) 
                     x = 0;
@@ -111,7 +95,22 @@ namespace ProceduralGeneration.Effect
                     y = 0;
             }
         }
-        
-        private int IndexOfMin(float[] arr) => arr.Select((n, i) => new {index = i, value = n}).OrderBy(item => item.value).First().index;
+
+        private int IndexOfMinimum(float[] nv)
+        {
+            var index = 0;
+            var min = nv[0];
+            
+            for (var i = 0; i < 3; i++)
+            {
+                if (!(nv[i] < min))
+                    continue;
+                
+                min = nv[i];
+                index = i;
+            }
+            
+            return index;
+        }
     }
 }
