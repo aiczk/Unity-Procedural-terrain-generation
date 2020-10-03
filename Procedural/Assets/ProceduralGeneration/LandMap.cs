@@ -9,13 +9,13 @@ namespace ProceduralGeneration
         //warning: do not change! 
         internal const int TextureSize = 500;
         internal const int Size = 257;
-        private const int MaxSize = 256;
+        internal const int MaxSize = 256;
         
-        private readonly float[] map;
+        private float[] map;
 
         public LandMap() => map = new float[Size * Size];
         
-        private static float RandomValue => UnityEngine.Random.Range(0.1f, 1.0f);
+        internal static float RandomValue => UnityEngine.Random.Range(0.1f, 1.0f);
 
         internal float GetHeight(int x, int y)
         {
@@ -33,6 +33,7 @@ namespace ProceduralGeneration
         }
 
         internal float Query(Func<float[], float> func) => func(map);
+        internal void Replace(ref float[] newMap) => map = newMap;
         
         public LandMap Initialize(float deviation)
         {
