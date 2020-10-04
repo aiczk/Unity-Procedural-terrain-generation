@@ -41,15 +41,12 @@ namespace ProceduralGeneration
             background.Apply();
             return background;
         }
-        
-        public static Texture2D CreateTexture(int textureSize,string name, FilterMode filterMode = FilterMode.Point, TextureFormat format = TextureFormat.RGBA32)
-        {
-            return new Texture2D(textureSize, textureSize, format, false)
+
+        public static Texture2D CreateTexture(int textureSize, string name, FilterMode filterMode = FilterMode.Point, TextureFormat format = TextureFormat.RGBA32) =>
+            new Texture2D(textureSize, textureSize, format, false)
             {
                 filterMode = filterMode,
                 name = name
             };
-        }
-
     }
 }

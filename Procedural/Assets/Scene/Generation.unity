@@ -573,7 +573,7 @@ MonoBehaviour:
   image: {fileID: 1486125542}
   altitude: 1.89
   height: 100
-  size: 50
+  size: 250
   perlin: 43.4
   octave: 29.7
   smooth: 1

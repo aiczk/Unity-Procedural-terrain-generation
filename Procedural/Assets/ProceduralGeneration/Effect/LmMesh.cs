@@ -37,7 +37,6 @@ namespace ProceduralGeneration.Effect
             for (var i = 0; i < halfSize; i++)
             for (var j = 0; j < halfSize; j++, ++vert)
             { 
-                //todo: no heightMap;
                 //vertices[vert] = new Vector3(i, (range - GetHeight(j, i)) / range * height / 2, j);
                 vertices[vert] = new Vector3(i, heightMap.GetPixel(i, j).grayscale * height / 3, j);
 
