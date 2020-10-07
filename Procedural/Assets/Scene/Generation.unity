@@ -570,17 +570,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f237d2183b8a2147b36d96baf13c028, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  image: {fileID: 1486125542}
-  altitude: 1.89
-  height: 100
-  size: 250
-  perlin: 43.4
-  octave: 29.7
-  smooth: 1
-  carryingCapacity: 1.49
-  depositionSpeed: 0.0317
+  heightMap: {fileID: 1486125542}
+  deviation: 2
+  size: 100
+  height: 75
+  perlin: 48.6
+  octave: 43.2
+  octaves: 5
+  lacunarity: 5
+  gain: 0.5
+  carryingCapacity: 1.5
+  depositionSpeed: 0.03
   iterationCount: 3
   drop: 8000000
+  u: 1
+  v: 1
+  smoothLevel: 1
 --- !u!64 &498657958
 MeshCollider:
   m_ObjectHideFlags: 0

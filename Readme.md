@@ -2,8 +2,8 @@
 
 An asset that allows you to easily generate terrain automatically.
 
-  - Corresponds to compositing height maps.
-  - You can combine Perlin and Octave Perlin noise to fabricate the generated terrain.
+  - These assets support the generation of HeightMap.
+  - By combining various noises, flexible expressions are possible.
 
 ### Intoroduction
 
@@ -25,8 +25,8 @@ var mesh = landMap
 
 image.sprite = Sprite.Create(lmHeightMap.HeightMap, new Rect(0, 0, 255, 255), Vector2.zero);
             
-gameObject.GetComponent<MeshFilter>().mesh = mesh;
-gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
+GetComponent<MeshFilter>().mesh = mesh;
+GetComponent<MeshCollider>().sharedMesh = mesh;
 ```
 
 The current version includes the six features listed above, and an easily extendable interface if it is missing.
